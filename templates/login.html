@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-white">
+
+  <div class="container py-5">
+    <div class="text-center mb-4">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Sicredi" class="img-fluid" style="max-width: 300px;">
+      <p class="small mt-2"><i class="bi bi-graph-up-arrow"></i> Tecnologia que impulsiona sua liberdade financeira</p>
+    </div>
+
+    <!-- Formulário de Login -->
+    <form method="POST" action="{{ url_for('login') }}" class="mx-auto p-4" style="max-width: 400px;">
+      <div class="mb-3">
+        <label for="usuario" class="form-label">Usuário</label>
+        <input type="text" name="usuario" id="usuario" class="form-control border-0 border-bottom border-white bg-transparent text-white" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="senha" class="form-label">Senha</label>
+        <input type="password" name="senha" id="senha" class="form-control border-0 border-bottom border-white bg-transparent text-white" required>
+      </div>
+
+      {% if erro %}
+        <div class="alert alert-danger text-center">{{ erro }}</div>
+      {% endif %}
+
+      <button type="submit" class="btn btn-light w-100">
+        <i class="bi bi-box-arrow-in-right"></i> Entrar
+      </button>
+    </form>
+
+    <div class="text-center mt-3">
+      <button type="button" class="btn btn-link text-white text-decoration-underline" data-bs-toggle="modal" data-bs-target="#modalCadastro">
+        Criar usuário
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal de Cadastro -->
+  <div class="modal fade" id="modalCadastro" tabindex="-1" aria-labelledby="modalCadastroLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCadastroLabel">Criar nova conta</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <form method="POST" action="{{ url_for('cadastro') }}">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="novo_usuario" class="form-label">Usuário</label>
+              <input type="text" name="usuario" id="novo_usuario" class="form-control border-0 border-bottom border-white bg-transparent text-white" required>
+            </div>
+            <div class="mb-3">
+              <label for="novo_email" class="form-label">E-mail</label>
+              <input type="email" name="email" id="novo_email" class="form-control border-0 border-bottom border-white bg-transparent text-white" required>
+            </div>
+            <div class="mb-3">
+              <label for="nova_senha" class="form-label">Senha</label>
+              <input type="password" name="senha" id="nova_senha" class="form-control border-0 border-bottom border-white bg-transparent text-white" required>
+            </div>
+            {% if erro_cadastro %}
+              <div class="alert alert-danger text-center">{{ erro_cadastro }}</div>
+            {% endif %}
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-light">Cadastrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% if erro_cadastro %}
+  <script>
+    const modal = new bootstrap.Modal(document.getElementById('modalCadastro'));
+    modal.show();
+  </script>
+  {% endif %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

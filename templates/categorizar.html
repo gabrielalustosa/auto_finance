@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Categorizar Gastos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-white">
+  <div class="container py-5">
+    <h3 class="mb-4">Categorizar Gastos</h3>
+
+    <form method="POST" action="{{ url_for('salvar_categorias') }}">
+      <table class="table table-dark table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Valor</th>
+            <th>Categoria</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for linha in dados %}
+          <tr>
+            <td>{{ linha['Data']|e }}</td>
+            <td>
+    <span id="descricao_texto_{{ loop.index }}">{{ linha['Descrição']|e }}</span>
+    <input type="text"
+      name="descricao_{{ loop.index }}"
+      id="descricao_input_{{ loop.index }}"
+      value="{{ linha['Descrição']|e }}"
+      class="form-control d-none mt-2">
+    {# campo hidden com índice/identificador da linha (não intrusivo) #}
+    <input type="hidden" name="row_index_{{ loop.index }}" value="{{ loop.index }}">
+            </td>
+            <td class="{% if linha['Valor']|replace(',', '.')|float < 0 %}text-danger{% else %}text-success{% endif %}">
+              {{ linha['Valor']|e }}
+            </td>
+            <td>
+              {% if linha['Valor']|replace(",", ".")|float < 0 %}
+                <select name="categoria_{{ loop.index }}" class="form-select">
+                  {% for cat in categorias %}
+                  <option value="{{ cat|e }}" {% if linha.get('Categoria') == cat %}selected{% endif %}>{{ cat|e }}</option>
+                  {% endfor %}
+                </select>
+              {% else %}
+                Receita
+              {% endif %}
+            </td>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline-light btn-edit" data-index="{{ loop.index }}">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="text-center mt-4">
+        <button type="submit" class="btn btn-light btn-lg rounded-0">
+          <i class="bi bi-check-circle"></i> Salvar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function editarDescricao(index) {
+      const idx = String(index);
+      const texto = document.getElementById("descricao_texto_" + idx);
+      const input = document.getElementById("descricao_input_" + idx);
+
+      if (!texto || !input) return;
+
+      texto.classList.add("d-none");
+      input.classList.remove("d-none");
+      input.focus();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.btn-edit').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          editarDescricao(this.dataset.index);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

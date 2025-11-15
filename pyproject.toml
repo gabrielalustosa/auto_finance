@@ -1,0 +1,42 @@
+[project]
+name = "auto_finance"
+authors = [
+    {name = "Gabriela Lustosa Soares", email = "soareslustosagabriela@gmail.com"},
+]
+description = "Auto Finance é uma solução automatizada desenvolvida para auxiliar usuários no controle de suas finanças pessoais. Através de uma interface simples, o sistema permite que o usuário informe seus gastos e receitas, gerando automaticamente uma planilha em Excel com categorização, totalização e visualização dos dados. O projeto visa promover organização financeira, facilitar o acompanhamento de despesas e incentivar o planejamento pessoal, utilizando tecnologias como Python."
+version = "0.0.1"
+readme = "README.md"
+requires-python = ">=3.11, <3.13"
+
+dependencies = [
+    "loguru~=0.7.2"
+]
+
+[project.optional-dependencies]
+dev = ["ruff~=0.11.10"]
+
+[tool.ruff]
+line-length = 90
+exclude = [".venv", "pyptoject.toml", "docs", ".ruff_cache", "build", ".vscode", "__pycache__", 
+".pytest_cache", "*.egg-info", "*.md", "docs", "docstring.py", "gunicorn.conf*", "taskfile"]
+
+[tool.ruff.lint]
+preview = true
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = "-p no:warnings"
+
+[tool.taskipy.tasks]
+pip_init = 'python -m pip install --upgrade pip'
+
+lint = 'ruff check'
+format = 'ruff format & ruff check --fix'
+
+docs =  'mkdocs build'
+docs_dinamic = 'mkdocs serve'

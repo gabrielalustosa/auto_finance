@@ -1,0 +1,15 @@
+# Folders:
+.ruff_cache/
+.pytest_cache/
+.venv/
+venv/
+__pycache__/
+htmlcov/
+.ruff_cache/
+.vscode/
+build/
+*.egg-info/
+*/environment/database/json/*.json
+
+# Files:
+teste*.py
