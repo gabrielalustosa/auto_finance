@@ -1,9 +1,16 @@
+import os
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('sqlite:////home/gabrielalustosa/autofinance.sqlite3', echo=True)
+usuario = "gabrielalustosa"
+senha = os.environ.get("DB_PASSWORD")
+host = f"{usuario}.mysql.pythonanywhere-services.com"
+banco = f"{usuario}$autofinance"
+
+engine = create_engine(f"mysql+pymysql://{usuario}:{senha}@{host}/{banco}", echo=True)
+
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -12,24 +19,25 @@ session = Session()
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True)
-    password = Column(String)
-    email = Column(String)
+    username = Column(String(100), unique=True)
+    password = Column(String(200))
+    email = Column(String(200))
     salario = Column(Float)
     criado_em = Column(DateTime, default=datetime.now)
+
 
 class Lancamento(Base):
     __tablename__ = 'lancamentos'
     id = Column(Integer, primary_key=True)
-    descricao = Column(String)
+    descricao = Column(String(200))
     valor = Column(Float)
-    tipo = Column(String)
-    categoria = Column(String)
+    tipo = Column(String(50))
+    categoria = Column(String(100))
     data = Column(DateTime)
-    usuario = Column(String)
+    usuario = Column(String(100))
+
 
 Base.metadata.create_all(engine)
-
 
 def buscar_usuario(username):
     return session.query(User).filter_by(username=username).first()
@@ -49,6 +57,12 @@ def buscar_salario(username):
     return user.salario if user else None
 
 def adicionar_item(descricao, valor, tipo, categoria, data, usuario):
+    if isinstance(data, str):
+        try:
+            data = datetime.strptime(data, "%d/%m/%Y")
+        except Exception:
+            data = datetime.now()
+
     novo_item = Lancamento(
         descricao=descricao,
         valor=valor,
