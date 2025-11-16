@@ -32,6 +32,82 @@ Este sistema de gestão financeira pessoal tem como principal objetivo facilitar
    python app.py
    ```
 
+## Executando localmente (passo a passo)
+
+Estas instruções mostram exatamente o que fazer para rodar o projeto no seu computador Windows (PowerShell). O projeto também está publicado em: https://gabrielalustosa.pythonanywhere.com — você pode acessar essa URL para ver a versão hospedada.
+
+1) Clone o repositório (se ainda não fez):
+
+```powershell
+git clone https://github.com/gabrielalustosa/auto_finance.git
+cd auto_finance
+```
+
+2) Crie e ative um ambiente virtual (PowerShell):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+3) Instale as dependências:
+
+```powershell
+pip install -r requirements.txt
+```
+
+4) Configurar variáveis de ambiente opcionais (recomendado para comportamento igual ao de produção):
+
+- `SECRET_KEY` — chave secreta do Flask (padrão é usado se não definido, mas é inseguro em produção).
+- `DB_PASSWORD` — senha do banco MySQL (se você quiser conectar ao MySQL no PythonAnywhere). Se não definir `DB_PASSWORD`, o projeto usará um banco SQLite local (arquivo `connection/autofinance_local.db`) como fallback para desenvolvimento.
+
+Exemplo (PowerShell):
+
+```powershell
+$env:SECRET_KEY = "minha_chave_secreta_local"
+# Se tiver senha do MySQL (opcional localmente):
+$env:DB_PASSWORD = "SENHA_DO_BANCO"
+```
+
+Observações sobre banco de dados:
+- Se você pretende usar o MySQL no PythonAnywhere (ou outro servidor MySQL), defina `DB_PASSWORD` com a senha correta antes de iniciar o app. O código criará as tabelas automaticamente com SQLAlchemy (`Base.metadata.create_all(engine)`).
+- Se preferir testar localmente sem configurar MySQL, não defina `DB_PASSWORD` — o app criará/usar um arquivo SQLite local automaticamente.
+
+5) Rodar o servidor localmente:
+
+```powershell
+python app.py
+```
+
+Por padrão o Flask iniciará em http://127.0.0.1:5000 ou http://localhost:5000 — abra essa URL no navegador para acessar a aplicação.
+
+6) Acesso à versão pública hospedada
+
+Se você não quiser rodar localmente, ou para comparar comportamentos, a versão hospedada está disponível em:
+
+```
+https://gabrielalustosa.pythonanywhere.com
+```
+
+Observação: para que a versão hospedada funcione corretamente com MySQL no PythonAnywhere, você precisa configurar no painel "Web" do PythonAnywhere a variável de ambiente `DB_PASSWORD` e recarregar (Reload) a aplicação.
+
+7) Criar usuário de teste (opção rápida)
+
+- Acesse `http://localhost:5000/cadastro` (ou use o formulário de cadastro disponível na rota `/` que redireciona para `/login`) e crie um usuário para testar login, dashboard e funcionalidades.
+
+Problemas comuns e como depurar
+
+- Internal Server Error (500) ao abrir `/login`:
+   - Verifique os logs no PythonAnywhere (Error log) para trace. Localmente, rode `python app.py` e observe o terminal para a stacktrace.
+   - Se houver erro de conexão ao banco, confirme que `DB_PASSWORD` está definido quando você espera usar MySQL. Caso contrário, o fallback SQLite evita a falha.
+- Erros de templates relacionados a dados: o módulo `connection/collections.py` agora retorna dicionários para `listar_itens` e `buscar_usuario`. Se você editar o código e passar objetos ORM diretamente, mantenha o formato esperado (dict com chaves como `Valor`, `valor`, `Descrição`, `Data`, `categoria`).
+
+Segurança / produção
+
+- Nunca comite senhas no repositório. Use variáveis de ambiente para `SECRET_KEY` e `DB_PASSWORD`.
+- Em produção, use um servidor WSGI (gunicorn/uWSGI) e configure logging e variáveis de ambiente no provedor.
+
+
 ## Estrutura do projeto (resumida)
 
 - `auto_finance/` — pacote principal
