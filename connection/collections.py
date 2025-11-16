@@ -1,88 +1,95 @@
 from datetime import datetime
-from pymongo import MongoClient
-from bson.objectid import ObjectId
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client["autofinance"] 
-users_collection = db["users"]
-materiais_collection = db["lancamentos"]
+engine = create_engine('sqlite:////home/gabrielalustosa/autofinance.sqlite3', echo=True)
+Base = declarative_base()
+Session = sessionmaker(bind=engine)
+session = Session()
+
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column(String, unique=True)
+    password = Column(String)
+    email = Column(String)
+    salario = Column(Float)
+    criado_em = Column(DateTime, default=datetime.now)
+
+class Lancamento(Base):
+    __tablename__ = 'lancamentos'
+    id = Column(Integer, primary_key=True)
+    descricao = Column(String)
+    valor = Column(Float)
+    tipo = Column(String)
+    categoria = Column(String)
+    data = Column(DateTime)
+    usuario = Column(String)
+
+Base.metadata.create_all(engine)
+
 
 def buscar_usuario(username):
-
-    """Busca um usuário pelo nome de usuário."""
-
-    return users_collection.find_one({"username": username})
+    return session.query(User).filter_by(username=username).first()
 
 def salvar_salario(username, valor):
-
-    """Salva ou atualiza o salário fixo do usuário"""
-
-    users_collection.update_one(
-        {"username": username},
-        {"$set": {"salario": float(valor)}},
-        upsert=True
-    )
+    user = session.query(User).filter_by(username=username).first()
+    if user:
+        user.salario = float(valor)
+        session.commit()
+    else:
+        novo_user = User(username=username, salario=float(valor))
+        session.add(novo_user)
+        session.commit()
 
 def buscar_salario(username):
-
-    """Retorna o salário fixo do usuário, se existir"""
-
-    user = users_collection.find_one({"username": username})
-    return user.get("salario") if user else None
+    user = session.query(User).filter_by(username=username).first()
+    return user.salario if user else None
 
 def adicionar_item(descricao, valor, tipo, categoria, data, usuario):
-
-    """Adiciona um novo lançamento financeiro (Despesas e receitas) vinculado a um usuário."""
-
-    novo_item = {
-        "descricao": descricao,
-        "valor": valor,
-        "tipo": tipo,
-        "categoria": categoria,
-        "data": data,
-        "usuario": usuario
-    }
-
-    materiais_collection.insert_one(novo_item)
+    novo_item = Lancamento(
+        descricao=descricao,
+        valor=valor,
+        tipo=tipo,
+        categoria=categoria,
+        data=data,
+        usuario=usuario
+    )
+    session.add(novo_item)
+    session.commit()
     return novo_item
 
 def listar_itens(usuario):
-
-    """Lista todos os lançamentos financeiros de um usuário."""
-
-    return list(materiais_collection.find({"usuario": usuario}))
+    return session.query(Lancamento).filter_by(usuario=usuario).all()
 
 def buscar_item(item_id):
-
-    """Busca um lançamento financeiro pelo seu ID do MongoDB"""
-
-    return materiais_collection.find_one({"_id": ObjectId(item_id)})
+    return session.query(Lancamento).filter_by(id=item_id).first()
 
 def atualizar_item(item_id, novos_dados):
-
-    """Atualiza os dados de um lançamento financeiro existente."""
-
-    return materiais_collection.find_one_and_update(
-        {"_id": ObjectId(item_id)},
-        {"$set": novos_dados},
-        return_document=True
-    )
+    item = session.query(Lancamento).filter_by(id=item_id).first()
+    if item:
+        for chave, valor in novos_dados.items():
+            setattr(item, chave, valor)
+        session.commit()
+    return item
 
 def retirar_item(item_id):
-
-    """Remove um lançamento financeiro pelo seu ID."""
-
-    return materiais_collection.delete_one({"_id": ObjectId(item_id)})
+    item = session.query(Lancamento).filter_by(id=item_id).first()
+    if item:
+        session.delete(item)
+        session.commit()
+        return True
+    return False
 
 def criar_usuario(username, senha, email):
-
-    """Cria um novo usuário no banco de dados."""
-
-    novo_usuario = {
-        "username": username,
-        "password": senha,
-        "email": email,
-        "criado_em": datetime.now()
-    }
-    users_collection.insert_one(novo_usuario)
+    novo_usuario = User(
+        username=username,
+        password=senha,
+        email=email,
+        criado_em=datetime.now()
+    )
+    session.add(novo_usuario)
+    session.commit()
     return novo_usuario
