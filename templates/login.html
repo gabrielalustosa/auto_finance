@@ -54,11 +54,11 @@
           <div class="modal-body">
             <div class="mb-3">
               <label for="novo_usuario" class="form-label">Usuário</label>
-              <input type="text" name="usuario" id="novo_usuario" class="form-control border-0 border-bottom border-white bg-transparent text-white" required>
+              <input type="text" name="usuario" id="novo_usuario" value="{{ novo_usuario|default('')|e }}" class="form-control border-0 border-bottom border-white bg-transparent text-white" required>
             </div>
             <div class="mb-3">
               <label for="novo_email" class="form-label">E-mail</label>
-              <input type="email" name="email" id="novo_email" class="form-control border-0 border-bottom border-white bg-transparent text-white" required>
+              <input type="email" name="email" id="novo_email" value="{{ novo_email|default('')|e }}" class="form-control border-0 border-bottom border-white bg-transparent text-white" required>
             </div>
             <div class="mb-3">
               <label for="nova_senha" class="form-label">Senha</label>
@@ -78,8 +78,14 @@
 
   {% if erro_cadastro %}
   <script>
-    const modal = new bootstrap.Modal(document.getElementById('modalCadastro'));
+    const modalEl = document.getElementById('modalCadastro');
+    const modal = new bootstrap.Modal(modalEl);
     modal.show();
+    // Ao abrir por erro de cadastro, foca o campo de senha para correção rápida
+    modalEl.addEventListener('shown.bs.modal', function () {
+      const pwd = document.getElementById('nova_senha');
+      if (pwd) pwd.focus();
+    });
   </script>
   {% endif %}
 

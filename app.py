@@ -53,7 +53,9 @@ def cadastro():
         criar_usuario(username, senha, email)
         return redirect(url_for('login'))
 
-    return render_template('login.html', erro_cadastro=erro)
+    # Em caso de erro, renderiza a página de login e reabre o modal de cadastro
+    # preservando o usuário e e-mail informados (não reenviamos a senha por segurança)
+    return render_template('login.html', erro_cadastro=erro, novo_usuario=username, novo_email=email)
 
 @app.route('/adicionar', methods=['POST'])
 @login_required
